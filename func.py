@@ -1,6 +1,5 @@
 from tkinter import Frame, Canvas
 from turtle import TurtleScreen, RawTurtle
-from time import sleep
 
 
 class InvaderScreen(Frame):
