@@ -1,6 +1,7 @@
 from tkinter import Frame, Canvas
 from turtle import TurtleScreen, RawTurtle
 from random import randint
+from time import sleep
 
 
 class InvaderScreen(Frame):
@@ -24,15 +25,18 @@ class InvaderScreen(Frame):
         self.bind_mouse_click(master)
         self.player_cord = 0
         self.bullet = None
-        self.bullet_trajectory = None
         self.bullet_speed = 50
         self.shooting_enabled = True
+        self.invaders_shooting_enabled = True
+        self.player_movement_enabled = True
+        self.rand_number = None
         self.draw_score()
         self.invaders = []
         self.draw_invaders()
-        self.invader_bullets = []
+        self.invader_bullet = None
         self.invader_bullet_speed = 99
-        self.broken = 0
+        self.invader_bullet_trajectory = 0
+        self.broken = []
 
     def draw_invaders(self):
         x_loc = -350
@@ -111,27 +115,29 @@ class InvaderScreen(Frame):
             new_bullet.color("green")
             new_bullet.goto(x=-(799 / 2 - round(event.x)), y=-320)
             new_bullet.showturtle()
-            self.bullet_trajectory = -(799 / 2 - round(event.x))
             self.bullet = new_bullet
 
     def move_bullet(self):
         if self.bullet is not None:
-            self.bullet.goto(x=self.bullet_trajectory, y=self.bullet.ycor() + self.bullet_speed)
-            self.canvas.update()
+            self.bullet.goto(x=self.bullet.xcor(), y=self.bullet.ycor() + self.bullet_speed)
             if self.bullet.ycor() > 400:
                 self.bullet.hideturtle()
-                self.bullet_trajectory = None
                 self.bullet = None
                 self.shooting_enabled = True
-        for bullet in self.invader_bullets:
-            bullet.goto(x=bullet.xcor(), y=bullet.ycor() - self.invader_bullet_speed)
-            if bullet.ycor() < -380:
-                self.invader_bullets.remove(bullet)
+
+    def move_invader_bullets(self):
+        if self.invader_bullet is not None:
+            self.invader_bullet.goto(x=self.invader_bullet.xcor(),
+                                     y=self.invader_bullet.ycor() - self.invader_bullet_speed)
+            if self.invader_bullet.ycor() < -380:
+                self.invader_bullet.hideturtle()
+                self.invader_bullet = None
 
     def move_player(self):
-        self.player_turtle_3.goto(x=self.player_cord, y=-325)
-        self.player_turtle_2.goto(x=self.player_cord, y=-330)
-        self.player_turtle_1.goto(x=self.player_cord, y=-335)
+        if self.player_movement_enabled:
+            self.player_turtle_3.goto(x=self.player_cord, y=-325)
+            self.player_turtle_2.goto(x=self.player_cord, y=-330)
+            self.player_turtle_1.goto(x=self.player_cord, y=-335)
 
     def motion(self, event):
         if 780 > round(event.x) > 20:
@@ -146,32 +152,56 @@ class InvaderScreen(Frame):
                     self.score += 20
                     self.bullet.hideturtle()
                     self.bullet.goto(char.xcor(), -380)
-                    self.bullet_trajectory = None
                     self.bullet = None
                     self.score_turtle.clear()
                     self.draw_score()
-                    self.broken += 1
+                    self.broken.append(self.invaders.index(char))
                     self.shooting_enabled = True
-                    if self.broken == self.invader_count:
+                    if len(self.broken) == self.invader_count:
                         self.shooting_enabled = False
                         self.invasion()
                         self.shooting_enabled = True
-                        self.broken = 0
-            if self.invaders.index(char) >= 15:
-                if len(self.invader_bullets) < 3:
-                    rand_number = randint(0, 10)
-                    if rand_number == 9:
-                        invader_bullet = RawTurtle(self.screen, shape="square")
-                        invader_bullet.hideturtle()
-                        invader_bullet.speed("fastest")
-                        invader_bullet.setheading(270)
-                        invader_bullet.penup()
-                        invader_bullet.shapesize(stretch_wid=0.1, stretch_len=0.5)
-                        invader_bullet.color("white")
-                        invader_bullet.goto(x=-(799 / 2 - char.xcor()), y=250)
-                        invader_bullet.showturtle()
-                        self.bullet_trajectory = -(799 / 2 - char.xcor())
-                        self.invader_bullets.append(invader_bullet)
+                        self.broken = []
+            if self.invader_bullet is not None:
+                if self.invader_bullet.distance(self.player_turtle_1) < 18:
+                    self.invader_bullet.goto(x=self.invader_bullet.xcor() - 500, y=self.invader_bullet.ycor())
+                    self.final_screen()
+
+    def final_screen(self):
+        self.player_movement_enabled = False
+        self.invaders_shooting_enabled = False
+        self.shooting_enabled = False
+
+        self.broken = []
+        for char in self.invaders:
+            char.hideturtle()
+        self.score_turtle.clear()
+        self.score_turtle.goto(-150, 0)
+        self.score_turtle.write(f"Your finishing score {self.score}\n\nwait a bit for next round",
+                                      font=("Arial", 20, "normal"))
+        sleep(3)
+        self.score_turtle.clear()
+        self.score = 0
+        self.draw_score()
+        self.invasion()
+        self.player_movement_enabled = True
+        self.invaders_shooting_enabled = True
+        self.shooting_enabled = True
+
+    def invader_shoot(self):
+        if self.invader_bullet is None and self.invaders_shooting_enabled:
+            self.rand_number = randint(0, 29)
+            if self.rand_number not in self.broken:
+                invader_bullet = RawTurtle(self.screen, shape="square")
+                invader_bullet.hideturtle()
+                invader_bullet.speed("fastest")
+                invader_bullet.setheading(270)
+                invader_bullet.penup()
+                invader_bullet.shapesize(stretch_wid=0.1, stretch_len=0.5)
+                invader_bullet.color("white")
+                invader_bullet.goto(x=self.invaders[self.rand_number].xcor(), y=250)
+                invader_bullet.showturtle()
+                self.invader_bullet = invader_bullet
 
     def bind_mouse(self, gui):
         return gui.bind("<Motion>", self.motion)
@@ -180,6 +210,11 @@ class InvaderScreen(Frame):
         return gui.bind("<Button-1>", self.player_shoot)
 
     def game(self):
-        self.check_bullet_impact()
+        self.canvas.update_idletasks()
+        self.invader_shoot()
+        self.move_invader_bullets()
         self.move_bullet()
+        self.check_bullet_impact()
         self.move_player()
+        self.canvas.update()
+
