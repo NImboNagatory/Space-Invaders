@@ -20,7 +20,6 @@ class InvaderScreen(Frame):
         self.invader_bullet = None
         self.invader_count = 30
         self.invader_bullet_speed = 99
-        self.invader_bullet_trajectory = 0
         self.broken = []
         self.score = 0
         self.invaders = []
