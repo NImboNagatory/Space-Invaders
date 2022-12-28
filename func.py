@@ -13,30 +13,28 @@ class InvaderScreen(Frame):
         self.screen.register_shape('data/invader.gif')
         self.screen.bgcolor("black")
         self.canvas.grid(padx=(5, 5), pady=(5, 5))
-        self.guideline_turtle_1 = None
         self.player_turtle_2 = None
         self.player_turtle_3 = None
         self.player_turtle_1 = None
         self.score_turtle = None
-        self.invader_count = 30
-        self.score = 0
-        self.create_player()
-        self.bind_mouse(master)
-        self.bind_mouse_click(master)
-        self.player_cord = 0
         self.bullet = None
+        self.invader_bullet = None
+        self.invader_count = 30
+        self.invader_bullet_speed = 99
+        self.invader_bullet_trajectory = 0
+        self.broken = []
+        self.score = 0
+        self.invaders = []
+        self.player_cord = 0
         self.bullet_speed = 50
         self.shooting_enabled = True
         self.invaders_shooting_enabled = True
         self.player_movement_enabled = True
-        self.rand_number = None
         self.draw_score()
-        self.invaders = []
+        self.create_player()
+        self.bind_mouse(master)
+        self.bind_mouse_click(master)
         self.draw_invaders()
-        self.invader_bullet = None
-        self.invader_bullet_speed = 99
-        self.invader_bullet_trajectory = 0
-        self.broken = []
 
     def draw_invaders(self):
         x_loc = -350
@@ -178,7 +176,7 @@ class InvaderScreen(Frame):
         self.score_turtle.clear()
         self.score_turtle.goto(-150, 0)
         self.score_turtle.write(f"Your finishing score {self.score}\n\nwait a bit for next round",
-                                      font=("Arial", 20, "normal"))
+                                font=("Arial", 20, "normal"))
         sleep(3)
         self.score_turtle.clear()
         self.score = 0
@@ -190,8 +188,8 @@ class InvaderScreen(Frame):
 
     def invader_shoot(self):
         if self.invader_bullet is None and self.invaders_shooting_enabled:
-            self.rand_number = randint(0, 29)
-            if self.rand_number not in self.broken:
+            rand_number = randint(0, 29)
+            if rand_number not in self.broken:
                 invader_bullet = RawTurtle(self.screen, shape="square")
                 invader_bullet.hideturtle()
                 invader_bullet.speed("fastest")
@@ -199,7 +197,7 @@ class InvaderScreen(Frame):
                 invader_bullet.penup()
                 invader_bullet.shapesize(stretch_wid=0.1, stretch_len=0.5)
                 invader_bullet.color("white")
-                invader_bullet.goto(x=self.invaders[self.rand_number].xcor(), y=250)
+                invader_bullet.goto(x=self.invaders[rand_number].xcor(), y=250)
                 invader_bullet.showturtle()
                 self.invader_bullet = invader_bullet
 
@@ -217,4 +215,3 @@ class InvaderScreen(Frame):
         self.check_bullet_impact()
         self.move_player()
         self.canvas.update()
-
