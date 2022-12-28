@@ -1,7 +1,6 @@
 from tkinter import Frame, Canvas
 from turtle import TurtleScreen, RawTurtle
 from random import randint
-from time import sleep
 
 
 class InvaderScreen(Frame):
@@ -177,7 +176,7 @@ class InvaderScreen(Frame):
         self.score_turtle.goto(-150, 0)
         self.score_turtle.write(f"Your finishing score {self.score}\n\nwait a bit for next round",
                                 font=("Arial", 20, "normal"))
-        sleep(3)
+        self.canvas.after(3000)
         self.score_turtle.clear()
         self.score = 0
         self.draw_score()
