@@ -175,7 +175,9 @@ class InvaderScreen(Frame):
         self.score_turtle.goto(-150, 0)
         self.score_turtle.write(f"Your finishing score {self.score}\n\nwait a bit for next round",
                                 font=("Arial", 20, "normal"))
+        self.canvas.update()
         self.canvas.after(3000)
+        self.canvas.update()
         self.score_turtle.clear()
         self.score = 0
         self.draw_score()
@@ -206,10 +208,8 @@ class InvaderScreen(Frame):
         return gui.bind("<Button-1>", self.player_shoot)
 
     def game(self):
-        self.canvas.update_idletasks()
         self.invader_shoot()
         self.move_invader_bullets()
         self.move_bullet()
         self.check_bullet_impact()
         self.move_player()
-        self.canvas.update()
